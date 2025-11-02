@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Bengali-English Translator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        textarea::-webkit-scrollbar { width: 8px; }
+        textarea::-webkit-scrollbar-track { background: transparent; }
+        textarea::-webkit-scrollbar-thumb {
+            background-color: #d1d5db;
+            border-radius: 20px;
+            border: 3px solid #f9fafb;
+        }
+        .recording {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 128, 128, 0.7); }
+            70% { box-shadow: 0 0 0 12px rgba(0, 128, 128, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 128, 128, 0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex flex-col h-screen max-w-lg mx-auto bg-white shadow-lg">
+        <!-- Header -->
+        <header class="flex items-center justify-between p-4 bg-white border-b">
+            <button class="p-2 invisible"><span class="material-symbols-outlined text-gray-600">menu</span></button>
+            <div class="flex items-center justify-center flex-grow gap-4">
+                <h2 id="source-lang-display" class="text-lg font-semibold text-gray-700">Bengali</h2>
+                <button id="swap-lang-btn" class="p-2 rounded-full hover:bg-gray-100 active:scale-90 transition-transform">
+                    <span class="material-symbols-outlined text-gray-600">compare_arrows</span>
+                </button>
+                <h2 id="target-lang-display" class="text-lg font-semibold text-gray-700">English</h2>
+            </div>
+            <div class="w-10"></div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="relative flex flex-col flex-1">
+            <!-- Input Area -->
+            <div class="flex flex-col flex-1 h-1/2 bg-white p-4">
+                <textarea id="text-input" class="w-full h-full text-3xl text-gray-800 bg-transparent resize-none focus:outline-none" placeholder="এখানে বাংলায় লিখুন..."></textarea>
+                <div class="flex items-center justify-center gap-6 mt-4">
+                    <div id="initial-icons" class="flex items-center gap-6">
+                        <button id="paste-btn" class="flex items-center justify-center w-14 h-14 bg-gray-100 rounded-full text-gray-600 active:scale-90 transition-transform">
+                            <span class="material-symbols-outlined text-3xl">content_paste</span>
+                        </button>
+                        <button class="mic-btn flex items-center justify-center w-14 h-14 bg-gray-100 rounded-full text-gray-600 active:scale-90 transition-transform">
+                            <span class="material-symbols-outlined text-3xl">mic</span>
+                        </button>
+                    </div>
+                    <div id="active-icons" class="hidden flex items-center gap-6">
+                        <button id="clear-btn" class="flex items-center justify-center w-14 h-14 bg-gray-100 rounded-full text-gray-600 active:scale-90 transition-transform">
+                            <span class="material-symbols-outlined text-3xl">close</span>
+                        </button>
+                        <button class="mic-btn flex items-center justify-center w-14 h-14 bg-gray-100 rounded-full text-gray-600 active:scale-90 transition-transform">
+                            <span class="material-symbols-outlined text-3xl">mic</span>
+                        </button>
+                        <button id="listen-source-btn" class="flex items-center justify-center w-14 h-14 bg-gray-100 rounded-full text-gray-600 active:scale-90 transition-transform">
+                            <span class="material-symbols-outlined text-3xl">volume_up</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Send Button -->
+            <button id="translate-btn" class="absolute z-10 top-1/2 right-4 transform -translate-y-1/2 w-16 h-16 bg-[#008080] rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-transform">
+                <span class="material-symbols-outlined text-white text-3xl">send</span>
+            </button>
+
+            <!-- Output Area -->
+            <div class="flex flex-col flex-1 h-1/2 bg-[#008080] p-4 text-white">
+                <div id="translation-output" class="flex-1 text-3xl overflow-y-auto"></div>
+                <div id="output-actions" class="hidden flex items-center justify-around mt-4">
+                    <button id="copy-output-btn" class="flex flex-col items-center text-white active:scale-90 transition-transform"><span class="material-symbols-outlined">content_copy</span><span class="text-xs">Copy</span></button>
+                    <button id="share-btn" class="flex flex-col items-center text-white active:scale-90 transition-transform"><span class="material-symbols-outlined">share</span><span class="text-xs">Share</span></button>
+                    <button id="save-btn" class="flex flex-col items-center text-white active:scale-90 transition-transform"><span id="save-icon" class="material-symbols-outlined">favorite</span><span class="text-xs">Save</span></button>
+                    <button id="listen-output-btn" class="flex flex-col items-center text-white active:scale-90 transition-transform"><span class="material-symbols-outlined">volume_up</span><span class="text-xs">Listen</span></button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Ad Banner Area -->
+        <footer class="py-1 bg-gray-50 border-t text-center">
+            <script type="text/javascript">
+                atOptions = {
+                    'key' : '717f9b17fcc5b8eb89966f2983f5f6de',
+                    'format' : 'iframe',
+                    'height' : 90,
+                    'width' : 728,
+                    'params' : {}
+                };
+            </script>
+            <script type="text/javascript" src="//www.highperformanceformat.com/717f9b17fcc5b8eb89966f2983f5f6de/invoke.js"></script>
+        </footer>
+    </div>
+
+    <script>
+        const textInput = document.getElementById('text-input');
+        const translateBtn = document.getElementById('translate-btn');
+        const translationOutput = document.getElementById('translation-output');
+        const initialIcons = document.getElementById('initial-icons');
+        const activeIcons = document.getElementById('active-icons');
+        const outputActions = document.getElementById('output-actions');
+        const clearBtn = document.getElementById('clear-btn');
+        const listenSourceBtn = document.getElementById('listen-source-btn');
+        const copyOutputBtn = document.getElementById('copy-output-btn');
+        const shareBtn = document.getElementById('share-btn');
+        const saveBtn = document.getElementById('save-btn');
+        const listenOutputBtn = document.getElementById('listen-output-btn');
+        const swapLangBtn = document.getElementById('swap-lang-btn');
+        const sourceLangDisplay = document.getElementById('source-lang-display');
+        const targetLangDisplay = document.getElementById('target-lang-display');
+        const pasteBtn = document.getElementById('paste-btn');
+        const micBtns = document.querySelectorAll('.mic-btn');
+
+        let sourceLang = 'bn', targetLang = 'en';
+        const langConfig = {
+            'bn': { name: 'Bengali', placeholder: 'এখানে বাংলায় লিখুন...', voiceCode: 'bn-IN' },
+            'en': { name: 'English', placeholder: 'Type in English...', voiceCode: 'en-US' }
+        };
+
+        const swapLanguages = () => {
+            [sourceLang, targetLang] = [targetLang, sourceLang];
+            sourceLangDisplay.textContent = langConfig[sourceLang].name;
+            targetLangDisplay.textContent = langConfig[targetLang].name;
+            textInput.placeholder = langConfig[sourceLang].placeholder;
+            const currentInput = textInput.value;
+            const currentOutput = translationOutput.textContent;
+            if (currentOutput.trim() && !currentOutput.includes('...')) {
+                textInput.value = currentOutput;
+                translationOutput.textContent = currentInput;
+            }
+            if (textInput.value.trim()) {
+                getTranslation();
+            }
+            updateUIState();
+        };
+
+        const updateUIState = () => {
+            const hasText = textInput.value.trim().length > 0;
+            initialIcons.classList.toggle('hidden', hasText);
+            activeIcons.classList.toggle('hidden', !hasText);
+            const hasTranslation = translationOutput.textContent.trim().length > 0 && !translationOutput.textContent.includes('...');
+            outputActions.classList.toggle('hidden', !hasTranslation);
+        };
+
+        const getTranslation = async () => {
+            const textToTranslate = textInput.value.trim();
+            if (!textToTranslate) return;
+            translationOutput.textContent = 'অনুবাদ করা হচ্ছে...';
+            outputActions.classList.add('hidden');
+            const apiUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(textToTranslate)}&langpair=${sourceLang}|${targetLang}`;
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('সার্ভার থেকে সঠিক সাড়া পাওয়া যায়নি।');
+                const data = await response.json();
+                if (data.responseStatus === 200 && data.responseData.translatedText) {
+                    translationOutput.textContent = data.responseData.translatedText;
+                } else {
+                    translationOutput.textContent = 'দুঃখিত, অনুবাদ করা সম্ভব হয়নি।';
+                }
+            } catch (error) {
+                console.error('Translation failed:', error);
+                translationOutput.textContent = 'ত্রুটি: ইন্টারনেট সংযোগ পরীক্ষা করুন।';
+            }
+            updateUIState();
+        };
+
+        const speakText = (text, langCode) => {
+            if (!('speechSynthesis' in window) || !text) return;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = langCode;
+            const setVoiceAndSpeak = () => {
+                const voices = window.speechSynthesis.getVoices();
+                const desiredVoice = voices.find(voice => voice.lang === langCode);
+                if (desiredVoice) utterance.voice = desiredVoice;
+                window.speechSynthesis.speak(utterance);
+            };
+            if (window.speechSynthesis.getVoices().length > 0) {
+                setVoiceAndSpeak();
+            } else {
+                window.speechSynthesis.onvoiceschanged = setVoiceAndSpeak;
+            }
+        };
+
+        swapLangBtn.addEventListener('click', swapLanguages);
+        textInput.addEventListener('input', updateUIState);
+        translateBtn.addEventListener('click', getTranslation);
+        clearBtn.addEventListener('click', () => {
+            textInput.value = '';
+            translationOutput.textContent = '';
+            updateUIState();
+        });
+
+        pasteBtn.addEventListener('click', async () => {
+            try {
+                if (!navigator.clipboard?.readText) throw new Error('Clipboard API not supported');
+                const text = await navigator.clipboard.readText();
+                textInput.value += text;
+                updateUIState();
+            } catch (err) {
+                alert('পেস্ট করা সম্ভব হচ্ছে না। অনুগ্রহ করে আপনার ব্রাউজারকে ক্লিপবোর্ড ব্যবহারের অনুমতি দিন।');
+            }
+        });
+
+        micBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRecognition) {
+                    alert("দুঃখিত, আপনার ব্রাউজার ভয়েস টাইপিং সমর্থন করে না।");
+                    return;
+                }
+                const recognition = new SpeechRecognition();
+                recognition.lang = langConfig[sourceLang].voiceCode;
+                recognition.interimResults = false;
+                recognition.onstart = () => btn.classList.add('recording');
+                recognition.onend = () => btn.classList.remove('recording');
+                recognition.onerror = (event) => {
+                    let errorMessage = "কিছু একটা সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।";
+                    if (event.error === 'not-allowed') {
+                        errorMessage = "মাইক্রোফোন ব্যবহারের অনুমতি প্রয়োজন। অনুগ্রহ করে ব্রাউজার সেটিংসে অনুমতি দিন।";
+                    } else if (event.error === 'no-speech') {
+                        errorMessage = "কোনো কথা শোনা যায়নি। অনুগ্রহ করে স্পষ্ট করে আবার বলুন।";
+                    }
+                    alert(errorMessage);
+                    btn.classList.remove('recording');
+                };
+                recognition.onresult = (event) => {
+                    textInput.value = event.results[0][0].transcript;
+                    updateUIState();
+                    getTranslation();
+                };
+                recognition.start();
+            });
+        });
+
+        listenSourceBtn.addEventListener('click', () => speakText(textInput.value, langConfig[sourceLang].voiceCode));
+        listenOutputBtn.addEventListener('click', () => speakText(translationOutput.textContent, langConfig[targetLang].voiceCode));
+        copyOutputBtn.addEventListener('click', () => navigator.clipboard.writeText(translationOutput.textContent).then(() => alert('ক্লিপবোর্ডে কপি করা হয়েছে!')).catch(() => alert('কপি করতে ব্যর্থ হয়েছে।')));
+        shareBtn.addEventListener('click', () => navigator.share ? navigator.share({ title: 'Translation', text: translationOutput.textContent }).catch(console.error) : alert('আপনার ডিভাইসে শেয়ার করার সুবিধা নেই।'));
+        saveBtn.addEventListener('click', () => {
+            alert('সেভ করা হয়েছে! (কার্যকারিতা পরীক্ষণাধীন)');
+        });
+
+        updateUIState();
+    </script>
+</body>
+</html>
